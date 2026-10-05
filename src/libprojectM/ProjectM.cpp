@@ -55,6 +55,7 @@ void ProjectM::PresetSwitchFailedEvent(const std::string&, const std::string&) c
 
 void ProjectM::LoadPresetFile(const std::string& presetFilename, bool smoothTransition)
 {
+    AbandonPresetLoad();
     try
     {
         m_textureManager->PurgeTextures();
@@ -66,8 +67,73 @@ void ProjectM::LoadPresetFile(const std::string& presetFilename, bool smoothTran
     }
 }
 
+auto ProjectM::BeginPresetFile(const std::string& presetFilename, bool smoothTransition) -> bool
+{
+    AbandonPresetLoad();
+    try
+    {
+        m_textureManager->PurgeTextures();
+        m_pendingPreset = m_presetFactoryManager->CreatePresetFromFile(presetFilename);
+    }
+    catch (const std::exception& ex)
+    {
+        PresetSwitchFailedEvent(presetFilename, ex.what());
+        return false;
+    }
+
+    m_pendingFilename = presetFilename;
+    m_pendingHardCut = !smoothTransition;
+    m_pendingStep = PendingStep::Initialize;
+    return true;
+}
+
+auto ProjectM::ContinuePresetLoad() -> bool
+{
+    try
+    {
+        switch (m_pendingStep)
+        {
+            case PendingStep::None:
+                return false;
+
+            case PendingStep::Initialize:
+                if (m_pendingPreset != nullptr)
+                {
+                    m_pendingPreset->Initialize(GetRenderContext());
+                }
+                m_pendingStep = PendingStep::Switch;
+                return true;
+
+            case PendingStep::Switch:
+                SwitchToPreset(std::move(m_pendingPreset), m_pendingHardCut, &m_retiredPreset);
+                m_pendingStep = m_retiredPreset != nullptr ? PendingStep::Retire : PendingStep::None;
+                return m_pendingStep != PendingStep::None;
+
+            case PendingStep::Retire:
+                m_retiredPreset.reset();
+                m_pendingStep = PendingStep::None;
+                return false;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        auto filename = m_pendingFilename;
+        AbandonPresetLoad();
+        PresetSwitchFailedEvent(filename, ex.what());
+    }
+    return false;
+}
+
+void ProjectM::AbandonPresetLoad()
+{
+    m_pendingStep = PendingStep::None;
+    m_pendingPreset.reset();
+    m_retiredPreset.reset();
+}
+
 void ProjectM::LoadPresetData(std::istream& presetData, bool smoothTransition)
 {
+    AbandonPresetLoad();
     try
     {
         m_textureManager->PurgeTextures();
@@ -234,14 +300,22 @@ void ProjectM::SetWindowSize(uint32_t width, uint32_t height)
 
 void ProjectM::StartPresetTransition(std::unique_ptr<Preset>&& preset, bool hardCut)
 {
+    if (preset != nullptr)
+    {
+        preset->Initialize(GetRenderContext());
+    }
+
+    SwitchToPreset(std::move(preset), hardCut, nullptr);
+}
+
+void ProjectM::SwitchToPreset(std::unique_ptr<Preset>&& preset, bool hardCut, std::unique_ptr<Preset>* retiredPreset)
+{
     m_presetChangeNotified = m_presetLocked;
 
     if (preset == nullptr)
     {
         return;
     }
-
-    preset->Initialize(GetRenderContext());
 
     // If already in a transition, force immediate completion.
     if (m_transitioningPreset != nullptr)
@@ -257,6 +331,10 @@ void ProjectM::StartPresetTransition(std::unique_ptr<Preset>&& preset, bool hard
 
     if (hardCut)
     {
+        if (retiredPreset != nullptr)
+        {
+            *retiredPreset = std::move(m_activePreset);
+        }
         m_activePreset = std::move(preset);
         m_timeKeeper->StartPreset();
     }

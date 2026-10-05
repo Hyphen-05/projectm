@@ -90,6 +90,19 @@ void projectm_load_preset_file(projectm_handle instance, const char* filename,
     projectMInstance->LoadPresetFile(filename, smooth_transition);
 }
 
+bool projectm_begin_preset_file(projectm_handle instance, const char* filename,
+                                bool smooth_transition)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    return projectMInstance->BeginPresetFile(filename, smooth_transition);
+}
+
+bool projectm_continue_preset_load(projectm_handle instance)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    return projectMInstance->ContinuePresetLoad();
+}
+
 bool projectm_prepare_preset_file(const char* filename)
 {
     if (filename == nullptr)

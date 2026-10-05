@@ -72,6 +72,35 @@ PROJECTM_EXPORT void projectm_load_preset_file(projectm_handle instance, const c
                                                bool smooth_transition);
 
 /**
+ * @brief Starts loading a preset file in steps, so that no single call does all of the work.
+ *
+ * Does what projectm_load_preset_file() does, spread over this call and the following calls to
+ * projectm_continue_preset_load(). This call reads the file and builds the preset. Each continue
+ * call then does one more step: initializing the preset (which compiles its shaders), switching to
+ * it, and destroying the preset it replaced. Until the switch step, the current preset keeps
+ * rendering. An application calls it once per frame, between frames, until it returns false, so
+ * that each frame pays for a part of the switch rather than one frame paying for all of it.
+ *
+ * A load already in progress is abandoned, as it is by projectm_load_preset_file(). A failure is
+ * reported through the preset switch failed callback, from inside whichever call failed.
+ *
+ * @param instance The projectM instance handle.
+ * @param filename The preset filename or URL to load.
+ * @param smooth_transition If true, the new preset is smoothly blended over.
+ * @return True if steps remain, false if the load failed in this call.
+ */
+PROJECTM_EXPORT bool projectm_begin_preset_file(projectm_handle instance, const char* filename,
+                                                bool smooth_transition);
+
+/**
+ * @brief Does the next step of a load started by projectm_begin_preset_file().
+ *
+ * @param instance The projectM instance handle.
+ * @return True if steps remain. False when the load is complete, has failed, or none was started.
+ */
+PROJECTM_EXPORT bool projectm_continue_preset_load(projectm_handle instance);
+
+/**
  * @brief Does the part of loading a preset file that needs no OpenGL context, ahead of time.
  *
  * Reads the file and translates its warp and composite shaders into a small cache shared by all

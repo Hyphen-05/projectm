@@ -77,6 +77,25 @@ public:
     void LoadPresetFile(const std::string& presetFilename, bool smoothTransition);
 
     /**
+     * @brief Starts loading the given preset file in steps, so no single call does all of the work.
+     *
+     * This call reads the file and builds the preset. Each ContinuePresetLoad() call then does one
+     * more step: initializing it, switching to it, and destroying the preset it replaced. Until the
+     * switch step, the current preset keeps rendering. A load already in progress is abandoned.
+     *
+     * @param presetFilename The preset filename to load.
+     * @param smoothTransition If set to true, old and new presets will be blended over smoothly.
+     * @return True if steps remain, false if the load failed here.
+     */
+    auto BeginPresetFile(const std::string& presetFilename, bool smoothTransition) -> bool;
+
+    /**
+     * @brief Does the next step of a load started by BeginPresetFile().
+     * @return True if steps remain.
+     */
+    auto ContinuePresetLoad() -> bool;
+
+    /**
      * @brief Loads the given preset data and performs a smooth or immediate transition.
      *
      * This function assumes the data to be in Milkdrop format.
@@ -180,6 +199,23 @@ private:
 
     void StartPresetTransition(std::unique_ptr<Preset>&& preset, bool hardCut);
 
+    /**
+     * @brief The part of StartPresetTransition() after the preset is initialized.
+     * @param retiredPreset If not null, receives the preset replaced by a hard cut instead of destroying it here.
+     */
+    void SwitchToPreset(std::unique_ptr<Preset>&& preset, bool hardCut, std::unique_ptr<Preset>* retiredPreset);
+
+    void AbandonPresetLoad();
+
+    /** The next step of a load started by BeginPresetFile(). */
+    enum class PendingStep
+    {
+        None,
+        Initialize,
+        Switch,
+        Retire
+    };
+
     void LoadIdlePreset();
 
     auto GetRenderContext() -> Renderer::RenderContext;
@@ -217,6 +253,12 @@ private:
     std::unique_ptr<Preset> m_transitioningPreset;                                //!< Destination preset when smooth preset switching.
     std::unique_ptr<Renderer::PresetTransition> m_transition;                     //!< Transition effect used for blending.
     std::unique_ptr<TimeKeeper> m_timeKeeper;                                     //!< Keeps the different timers used to render and switch presets.
+
+    PendingStep m_pendingStep{PendingStep::None}; //!< What ContinuePresetLoad() does next.
+    std::unique_ptr<Preset> m_pendingPreset;      //!< Built by BeginPresetFile(), not yet switched to.
+    std::string m_pendingFilename;                //!< For the failure event of a later step.
+    bool m_pendingHardCut{false};                 //!< The transition asked for in BeginPresetFile().
+    std::unique_ptr<Preset> m_retiredPreset;      //!< Replaced by the switch step, destroyed by the next step.
 };
 
 } // namespace libprojectM

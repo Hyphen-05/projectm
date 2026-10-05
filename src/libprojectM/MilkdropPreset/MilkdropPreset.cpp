@@ -200,7 +200,15 @@ auto MilkdropPreset::OutputTexture() const -> std::shared_ptr<Renderer::Texture>
 
 void MilkdropPreset::DrawInitialImage(const std::shared_ptr<Renderer::Texture>& image, const Renderer::RenderContext& renderContext)
 {
-    m_framebuffer.SetSize(renderContext.viewportSizeX, renderContext.viewportSizeY);
+    // A preset loaded in steps can be initialized at one window size and switched to at another. Resize the UV map
+    // with the framebuffer here, as RenderFrame() does, because RenderFrame() only resizes it when the framebuffer's
+    // size changes, and after this call it will not. The UV map is attached beside the main texture, and a
+    // framebuffer with attachments of two sizes draws only where they overlap.
+    if (m_framebuffer.SetSize(renderContext.viewportSizeX, renderContext.viewportSizeY))
+    {
+        m_motionVectorUVMap->SetSize(renderContext.viewportSizeX, renderContext.viewportSizeY);
+        m_isFirstFrame = true;
+    }
 
     // Render to previous framebuffer, as this is the image used to draw the next frame on.
     m_flipTexture.Draw(image, m_framebuffer, m_previousFrameBuffer);
