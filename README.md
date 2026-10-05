@@ -1,3 +1,7 @@
+> **This is a fork.** The `android` branch is libprojectM as an Android app ships it, published under the
+> LGPL-2.1: see [ANDROID-APP.md](ANDROID-APP.md). For projectM itself, go to
+> [projectM-visualizer/projectm](https://github.com/projectM-visualizer/projectm).
+
 [![Windows Build Status](https://github.com/projectM-visualizer/projectm/actions/workflows/build_windows.yml/badge.svg?branch=master)](https://github.com/projectM-visualizer/projectm/actions/workflows/build_windows.yml)
 [![Linux Build Status](https://github.com/projectM-visualizer/projectm/actions/workflows/build_linux.yml/badge.svg?branch=master)](https://github.com/projectM-visualizer/projectm/actions/workflows/build_linux.yml)
 [![macOS Build Status](https://github.com/projectM-visualizer/projectm/actions/workflows/build_osx.yml/badge.svg?branch=master)](https://github.com/projectM-visualizer/projectm/actions/workflows/build_osx.yml)
