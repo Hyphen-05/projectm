@@ -45,6 +45,16 @@ public:
      */
     void Initialize(PresetFileParser& parsedFile);
 
+    /**
+     * @brief Reads the preset and shader versions as Initialize does, for code that has no PresetState.
+     * Each value is left as it was if the file does not set it, so pass the defaults in.
+     * @param parsedFile The file parser with the preset data.
+     * @param presetVersion MILKDROP_PRESET_VERSION.
+     * @param warpShaderVersion The warp shader version.
+     * @param compositeShaderVersion The composite shader version.
+     */
+    static void ReadVersions(PresetFileParser& parsedFile, int& presetVersion, int& warpShaderVersion, int& compositeShaderVersion);
+
     BlendableFloat gammaAdj{2.0f};
     BlendableFloat videoEchoZoom{2.0f};
     BlendableFloat videoEchoAlpha{0.0f};

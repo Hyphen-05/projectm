@@ -100,6 +100,21 @@ public:
     auto TexSizeDeclaration() const -> std::string;
 
     /**
+     * @brief The sampler declaration a descriptor with a texture and sampler returns, without needing either.
+     * @param samplerName The sampler name.
+     * @param is3D Whether the texture is a 3D texture.
+     * @return The sampler declaration for use in the preset HLSL shaders.
+     */
+    static auto SamplerDeclaration(const std::string& samplerName, bool is3D) -> std::string;
+
+    /**
+     * @brief The texsize declaration a descriptor with a texture and sampler returns, without needing either.
+     * @param sizeName The texsize name.
+     * @return The texsize declaration for use in the preset HLSL shaders.
+     */
+    static auto TexSizeDeclaration(const std::string& sizeName) -> std::string;
+
+    /**
      * @brief Tries to update the texture and sampler from the given texture manager if invalid.
      * @param textureManager The texture manager to retrieve the new data from.
      */

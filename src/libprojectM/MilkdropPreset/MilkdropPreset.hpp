@@ -69,6 +69,14 @@ public:
     MilkdropPreset(std::istream& presetData);
 
     /**
+     * @brief Does the part of loading a preset file that needs no GL context, ahead of the load.
+     * Safe on any thread, concurrently with rendering; see MilkdropShader::PrepareTranslations.
+     * @param absoluteFilePath The preset file.
+     * @return True if anything was prepared.
+     */
+    static auto Prepare(const std::string& absoluteFilePath) -> bool;
+
+    /**
      * @brief Initializes the preset with rendering-related data.
      * @param renderContext The initial render context.
      */

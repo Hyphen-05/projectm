@@ -27,6 +27,14 @@ public:
 
     std::unique_ptr<Preset> LoadPresetFromStream(std::istream& data) override;
 
+    /**
+     * @brief Does the part of LoadPresetFromFile that needs no GL context, ahead of it.
+     * Safe on any thread, concurrently with rendering; see MilkdropPreset::Prepare.
+     * @param filename The preset filename or URL, as LoadPresetFromFile will be given it.
+     * @return True if anything was prepared.
+     */
+    static auto PreparePresetFromFile(const std::string& filename) -> bool;
+
     std::string supportedExtensions() const override
     {
         return ".milk .prjm";

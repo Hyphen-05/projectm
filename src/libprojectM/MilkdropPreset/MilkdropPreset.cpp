@@ -55,6 +55,29 @@ MilkdropPreset::MilkdropPreset(std::istream& presetData)
     Load(presetData);
 }
 
+auto MilkdropPreset::Prepare(const std::string& absoluteFilePath) -> bool
+{
+    if (!MilkdropShader::StaticShadersReady())
+    {
+        return false;
+    }
+
+    PresetFileParser parser;
+    if (!parser.Read(absoluteFilePath))
+    {
+        return false;
+    }
+
+    // PresetState's defaults.
+    int presetVersion{100};
+    int warpShaderVersion{2};
+    int compositeShaderVersion{2};
+    PresetState::ReadVersions(parser, presetVersion, warpShaderVersion, compositeShaderVersion);
+
+    return MilkdropShader::PrepareTranslations(warpShaderVersion, parser.GetCode("warp_"),
+                                               compositeShaderVersion, parser.GetCode("comp_"));
+}
+
 void MilkdropPreset::Initialize(const Renderer::RenderContext& renderContext)
 {
     assert(renderContext.textureManager);

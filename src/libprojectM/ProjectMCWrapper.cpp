@@ -4,6 +4,9 @@
 
 #include <Audio/AudioConstants.hpp>
 
+#include "MilkdropPreset/Factory.hpp"
+#include "Utils.hpp"
+
 #include <cstring>
 #include <sstream>
 
@@ -85,6 +88,37 @@ void projectm_load_preset_file(projectm_handle instance, const char* filename,
 {
     auto projectMInstance = handle_to_instance(instance);
     projectMInstance->LoadPresetFile(filename, smooth_transition);
+}
+
+bool projectm_prepare_preset_file(const char* filename)
+{
+    if (filename == nullptr)
+    {
+        return false;
+    }
+
+    try
+    {
+        // As PresetFactoryManager routes a file by its extension: only the Milkdrop factory's files.
+        std::string const name = filename;
+        auto const extensionStart = name.find_last_of('.');
+        if (extensionStart == std::string::npos)
+        {
+            return false;
+        }
+        auto const extension = libprojectM::Utils::ToLower(name.substr(extensionStart));
+        if (extension != ".milk" && extension != ".prjm")
+        {
+            return false;
+        }
+
+        return libprojectM::MilkdropPreset::Factory::PreparePresetFromFile(name);
+    }
+    catch (...)
+    {
+        // Preparing is only ever an optimisation. Whatever failed here will fail, or not, at load time as before.
+        return false;
+    }
 }
 
 void projectm_load_preset_data(projectm_handle instance, const char* data,

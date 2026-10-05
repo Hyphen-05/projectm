@@ -72,6 +72,26 @@ PROJECTM_EXPORT void projectm_load_preset_file(projectm_handle instance, const c
                                                bool smooth_transition);
 
 /**
+ * @brief Does the part of loading a preset file that needs no OpenGL context, ahead of time.
+ *
+ * Reads the file and translates its warp and composite shaders into a small cache shared by all
+ * instances, so that a later projectm_load_preset_file() of the same file does less work at the
+ * moment of the switch. Call it for the preset expected to load next.
+ *
+ * Unlike every other function, this one may be called from any thread, concurrently with
+ * rendering: it takes no instance, and touches no OpenGL object and no texture manager. It does
+ * nothing until an instance has loaded a preset with a shader on its own thread, because the
+ * translation needs to know the shader language version of the context.
+ *
+ * A prepared translation is used only if translating at load time would have produced exactly the
+ * same text, so calling this never changes what a preset looks like, only when the work is done.
+ *
+ * @param filename The preset filename or URL, as it will be passed to projectm_load_preset_file().
+ * @return True if anything was prepared.
+ */
+PROJECTM_EXPORT bool projectm_prepare_preset_file(const char* filename);
+
+/**
  * @brief Loads a preset from the data pointer.
  *
  * Currently, the preset data is assumed to be in Milkdrop format.

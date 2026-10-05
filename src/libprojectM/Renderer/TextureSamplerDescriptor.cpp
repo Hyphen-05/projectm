@@ -83,8 +83,13 @@ auto TextureSamplerDescriptor::SamplerDeclaration() const -> std::string
         return {};
     }
 
+    return SamplerDeclaration(m_samplerName, m_texture->Type() == GL_TEXTURE_3D);
+}
+
+auto TextureSamplerDescriptor::SamplerDeclaration(const std::string& samplerName, bool is3D) -> std::string
+{
     std::string declaration = "uniform ";
-    if (m_texture->Type() == GL_TEXTURE_3D)
+    if (is3D)
     {
         declaration.append("sampler3D sampler_");
     }
@@ -92,15 +97,15 @@ auto TextureSamplerDescriptor::SamplerDeclaration() const -> std::string
     {
         declaration.append("sampler2D sampler_");
     }
-    declaration.append(m_samplerName);
+    declaration.append(samplerName);
     declaration.append(";\n");
 
     // Add short sampler name for prefixed random textures.
     // E.g. "sampler_rand00" if a sampler "sampler_rand00_smalltiled" was declared
-    if (m_samplerName.substr(0, 4) == "rand" && m_samplerName.length() > 7 && m_samplerName.at(6) == '_')
+    if (samplerName.substr(0, 4) == "rand" && samplerName.length() > 7 && samplerName.at(6) == '_')
     {
         declaration.append("uniform sampler2D sampler_");
-        declaration.append(m_samplerName.substr(0, 6));
+        declaration.append(samplerName.substr(0, 6));
         declaration.append(";\n");
     }
 
@@ -114,19 +119,24 @@ auto TextureSamplerDescriptor::TexSizeDeclaration() const -> std::string
         return {};
     }
 
+    return TexSizeDeclaration(m_sizeName);
+}
+
+auto TextureSamplerDescriptor::TexSizeDeclaration(const std::string& sizeName) -> std::string
+{
     std::string declaration;
-    if (!m_sizeName.empty())
+    if (!sizeName.empty())
     {
         declaration.append("uniform float4 texsize_");
-        declaration.append(m_sizeName);
+        declaration.append(sizeName);
         declaration.append(";\n");
 
         // Add short texsize uniform for prefixed random textures.
         // E.g. "texsize_rand00" if a sampler "sampler_rand00_smalltiled" was declared
-        if (m_sizeName.substr(0, 4) == "rand" && m_sizeName.length() > 7 && m_sizeName.at(6) == '_')
+        if (sizeName.substr(0, 4) == "rand" && sizeName.length() > 7 && sizeName.at(6) == '_')
         {
             declaration.append("uniform float4 texsize_");
-            declaration.append(m_sizeName.substr(0, 6));
+            declaration.append(sizeName.substr(0, 6));
             declaration.append(";\n");
         }
     }

@@ -25,6 +25,18 @@ std::unique_ptr<::libprojectM::Preset> Factory::LoadPresetFromFile(const std::st
     }
 }
 
+auto Factory::PreparePresetFromFile(const std::string& filename) -> bool
+{
+    // Routed as LoadPresetFromFile routes it: only a local file is a MilkdropPreset.
+    std::string path;
+    auto const protocol = PresetFactory::Protocol(filename, path);
+    if (protocol != "" && protocol != "file")
+    {
+        return false;
+    }
+    return MilkdropPreset::Prepare(path);
+}
+
 std::unique_ptr<Preset> Factory::LoadPresetFromStream(std::istream& data)
 {
     return std::make_unique<MilkdropPreset>(data);
