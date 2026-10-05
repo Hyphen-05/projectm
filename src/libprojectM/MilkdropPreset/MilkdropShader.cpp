@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <atomic>
 #include <list>
+#include <locale>
 #include <mutex>
 #include <set>
 #include <utility>

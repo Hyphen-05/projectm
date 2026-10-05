@@ -9,7 +9,8 @@ the app uses it.** The app's own code is not part of libprojectM and is not here
 - Upstream: https://github.com/projectM-visualizer/projectm
 - Base: tag `v4.1.7`, commit `e0b0a967f0ffd7d332106c366668ed271718472b`
 - On top of it, six commits, one per patch the app applies before every native build, in this order:
-  `0001` to `0006`. Each commit's diff is the patch.
+  `0001` to `0006`. Each commit's diff is the patch as first published; later fixes to a patch follow as commits
+  of their own. The branch's latest tree is always exactly what the app builds.
 - Submodule: `vendor/projectm-eval` at `da885dcdf33620ef26aa04cac9e215378b80252e`, unchanged from upstream.
 
 ## Rebuilding it
