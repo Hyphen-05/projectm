@@ -317,6 +317,11 @@ void MilkdropShader::LoadVariables(const PresetState& presetState, const PerFram
 
     m_shader.SetUniformMat4x4("vertex_transformation", PresetState::orthogonalProjection);
 
+    if (m_type == ShaderType::CompositeShader)
+    {
+        m_shader.SetUniformFloat("_tone_knee", presetState.renderContext.toneMapKnee);
+    }
+
     m_shader.SetUniformFloat4("rand_frame", {floatRand(),
                                              floatRand(),
                                              floatRand(),
@@ -570,8 +575,30 @@ void PS(float4 _vDiffuse : COLOR,
     found = program.rfind('}');
     if (found != std::string::npos)
     {
-        program.replace(int(found), 1, "_return_value = float4(ret.xyz, 1.0);\n"
-                                       "}\n");
+        if (type == ShaderType::CompositeShader)
+        {
+            // The composite's result is the last float value before the 8-bit output clamps it. Above the knee,
+            // scale the whole colour so its brightest channel follows a shoulder towards 1.0 rather than clipping:
+            // the ratio between channels, and so the hue, survives. The shoulder meets the identity with the same
+            // slope at the knee, so nothing below it moves. _tone_knee is 0 when this is switched off.
+            program.replace(int(found), 1, "if (_tone_knee > 0.0)\n"
+                                           "{\n"
+                                           "float _tone_peak = max(ret.x, max(ret.y, ret.z));\n"
+                                           "if (_tone_peak > _tone_knee)\n"
+                                           "{\n"
+                                           "float _tone_room = 1.0 - _tone_knee;\n"
+                                           "float _tone_rolled = _tone_knee + _tone_room * (1.0 - exp((_tone_knee - _tone_peak) / _tone_room));\n"
+                                           "ret *= _tone_rolled / _tone_peak;\n"
+                                           "}\n"
+                                           "}\n"
+                                           "_return_value = float4(ret.xyz, 1.0);\n"
+                                           "}\n");
+        }
+        else
+        {
+            program.replace(int(found), 1, "_return_value = float4(ret.xyz, 1.0);\n"
+                                           "}\n");
+        }
     }
     else
     {
@@ -645,7 +672,8 @@ void PS(float4 _vDiffuse : COLOR,
                           "#define ang _rad_ang.y\n"
                           "#define uv _uv.xy\n"
                           "#define uv_orig _uv.xy\n"
-                          "#define hue_shader _vDiffuse.xyz\n");
+                          "#define hue_shader _vDiffuse.xyz\n"
+                          "uniform float _tone_knee;\n");
     }
 
     fullSource.append(program);

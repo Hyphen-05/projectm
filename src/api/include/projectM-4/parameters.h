@@ -101,6 +101,30 @@ PROJECTM_EXPORT void projectm_set_hard_cut_enabled(projectm_handle instance, boo
 PROJECTM_EXPORT bool projectm_get_hard_cut_enabled(projectm_handle instance);
 
 /**
+ * @brief Sets where the final composite pass starts rolling highlights off instead of clipping them.
+ *
+ * A composite shader computes its colour in floating point and the 8-bit output clamps it, so a
+ * preset whose composite multiplies can blow large areas out to flat white or a flat primary.
+ * With a knee between 0 and 1, a pixel whose brightest channel is above the knee is scaled down
+ * along a smooth shoulder that approaches 1.0, keeping the ratio between its channels, so hue and
+ * detail survive where they would have clipped. Below the knee nothing changes.
+ *
+ * Only presets with a composite shader are affected; the feedback loop is never touched, so a
+ * preset still evolves exactly as authored. Takes effect on the next frame without recompiling.
+ *
+ * @param instance The projectM instance handle.
+ * @param knee The brightness where the roll-off starts, or 0 (the default) to leave output as authored.
+ */
+PROJECTM_EXPORT void projectm_set_tone_map_knee(projectm_handle instance, float knee);
+
+/**
+ * @brief Returns the composite pass's roll-off knee.
+ * @param instance The projectM instance handle.
+ * @return The knee, or 0 when output is left to clip as authored.
+ */
+PROJECTM_EXPORT float projectm_get_tone_map_knee(projectm_handle instance);
+
+/**
  * @brief Sets the hard cut volume sensitivity.
  *
  * The beat detection volume difference that must be surpassed to trigger a hard cut.

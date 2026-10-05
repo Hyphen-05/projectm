@@ -411,6 +411,17 @@ void ProjectM::SetHardCutEnabled(bool enabled)
     m_hardCutEnabled = enabled;
 }
 
+auto ProjectM::ToneMapKnee() const -> float
+{
+    return m_toneMapKnee;
+}
+
+void ProjectM::SetToneMapKnee(float knee)
+{
+    // Outside (0, 1) there is no shoulder to draw: at 1 or above nothing would ever be rolled off.
+    m_toneMapKnee = (knee > 0.0f && knee < 1.0f) ? knee : 0.0f;
+}
+
 auto ProjectM::HardCutSensitivity() const -> float
 {
     return m_hardCutSensitivity;
@@ -529,6 +540,7 @@ auto ProjectM::GetRenderContext() -> Renderer::RenderContext
     ctx.invAspectY = 1.0f / ctx.aspectY;
     ctx.perPixelMeshX = static_cast<int>(m_meshX);
     ctx.perPixelMeshY = static_cast<int>(m_meshY);
+    ctx.toneMapKnee = m_toneMapKnee;
     ctx.textureManager = m_textureManager.get();
 
     return ctx;

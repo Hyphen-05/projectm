@@ -138,6 +138,10 @@ public:
 
     void SetHardCutEnabled(bool enabled);
 
+    auto ToneMapKnee() const -> float;
+
+    void SetToneMapKnee(float knee);
+
     auto HardCutSensitivity() const -> float;
 
     void SetHardCutSensitivity(float sensitivity);
@@ -230,6 +234,7 @@ private:
     double m_hardCutDuration{20.0};  //!< Time after which a hard cut can happen at the earliest.
     bool m_hardCutEnabled{false};    //!< If true, hard cuts based on beat detection are enabled.
     float m_hardCutSensitivity{2.0}; //!< Loudness sensitivity value for hard cuts.
+    float m_toneMapKnee{0.0f};       //!< Where the composite pass starts rolling highlights off. 0: off.
     float m_beatSensitivity{1.0};    //!< General beat sensitivity modifier for presets.
     bool m_aspectCorrection{true};   //!< If true, corrects aspect ratio for non-rectangular windows.
     float m_easterEgg{1.0};          //!< Random preset duration modifier. See TimeKeeper class.

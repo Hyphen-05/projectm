@@ -29,6 +29,8 @@ public:
     int perPixelMeshX{64}; //!< Per-pixel/per-vertex mesh X resolution.
     int perPixelMeshY{48}; //!< Per-pixel/per-vertex mesh Y resolution.
 
+    float toneMapKnee{0.0f}; //!< Where the composite pass starts rolling highlights off. 0: left to clip.
+
     TextureManager* textureManager{nullptr}; //!< Holds all loaded textures for shader access.
 };
 

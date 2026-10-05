@@ -248,6 +248,18 @@ bool projectm_get_hard_cut_enabled(projectm_handle instance)
     return projectMInstance->HardCutEnabled();
 }
 
+void projectm_set_tone_map_knee(projectm_handle instance, float knee)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    projectMInstance->SetToneMapKnee(knee);
+}
+
+float projectm_get_tone_map_knee(projectm_handle instance)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    return projectMInstance->ToneMapKnee();
+}
+
 void projectm_set_hard_cut_enabled(projectm_handle instance, bool enabled)
 {
     auto projectMInstance = handle_to_instance(instance);
