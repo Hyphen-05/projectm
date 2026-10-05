@@ -13,8 +13,91 @@
 #include <glm/mat4x4.hpp>
 
 #include <algorithm>
-#include <regex>
 #include <set>
+
+namespace {
+
+// What ECMAScript's \s matches, restricted to the characters a preset's shader text can contain.
+auto IsEcmaSpace(char c) -> bool
+{
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
+}
+
+// ECMAScript's "." stops at these, so a ".*" at the end of a pattern runs to the end of the line.
+auto EndOfLine(const std::string& text, size_t pos) -> size_t
+{
+    const size_t end = text.find_first_of("\r\n", pos);
+    return end == std::string::npos ? text.size() : end;
+}
+
+// Finds the leftmost match of the regex `sampler(2D|3D|)(\s+|\().*` and returns its position, setting length.
+// A hand-written scan with exactly that regex's result: std::regex costs about a fifth of a preset load on a
+// phone because a new one was compiled on every pass of the loop that calls this.
+auto FindSamplerDeclaration(const std::string& text, size_t& length) -> size_t
+{
+    static const std::string word = "sampler";
+    for (size_t start = text.find(word); start != std::string::npos; start = text.find(word, start + 1))
+    {
+        size_t pos = start + word.size();
+        // "2D" and "3D" are tried before the empty alternative, but only one of the three can be followed by
+        // whitespace or "(", so the order cannot change the result.
+        if (text.compare(pos, 2, "2D") == 0 || text.compare(pos, 2, "3D") == 0)
+        {
+            pos += 2;
+        }
+        if (pos >= text.size())
+        {
+            continue;
+        }
+        if (text[pos] == '(')
+        {
+            pos++;
+        }
+        else if (IsEcmaSpace(text[pos]))
+        {
+            // \s+ is greedy and ".*" can match nothing, so the whitespace run is always taken whole,
+            // line breaks included.
+            while (pos < text.size() && IsEcmaSpace(text[pos]))
+            {
+                pos++;
+            }
+        }
+        else
+        {
+            continue;
+        }
+        length = EndOfLine(text, pos) - start;
+        return start;
+    }
+    return std::string::npos;
+}
+
+// Finds the leftmost match of the regex `float4\s+texsize_.*`, as FindSamplerDeclaration does for its pattern.
+auto FindTexSizeDeclaration(const std::string& text, size_t& length) -> size_t
+{
+    static const std::string word = "float4";
+    static const std::string name = "texsize_";
+    for (size_t start = text.find(word); start != std::string::npos; start = text.find(word, start + 1))
+    {
+        size_t pos = start + word.size();
+        const size_t spaceStart = pos;
+        while (pos < text.size() && IsEcmaSpace(text[pos]))
+        {
+            pos++;
+        }
+        // Backing off the greedy \s+ would leave a whitespace character where "t" is needed, so the whole run
+        // is the only way this can match.
+        if (pos == spaceStart || text.compare(pos, name.size(), name) != 0)
+        {
+            continue;
+        }
+        length = EndOfLine(text, pos + name.size()) - start;
+        return start;
+    }
+    return std::string::npos;
+}
+
+} // namespace
 
 namespace libprojectM {
 namespace MilkdropPreset {
@@ -619,16 +702,16 @@ void MilkdropShader::TranspileHLSLShader(const PresetState& presetState, std::st
     //       The below code causes invalid syntax as it leaves part of the expression.
     //       Leaving it in causes HLSLParser to add "sampler_XYZ = sampler2D( <unknown expression> );"
     //       in the main() function, which is also bad...
-    std::smatch matches;
-    while (std::regex_search(sourcePreprocessed, matches, std::regex("sampler(2D|3D|)(\\s+|\\().*")))
+    size_t matchLength{};
+    for (size_t pos; (pos = FindSamplerDeclaration(sourcePreprocessed, matchLength)) != std::string::npos;)
     {
-        sourcePreprocessed.replace(matches.position(), matches.length(), "");
+        sourcePreprocessed.erase(pos, matchLength);
     }
 
     // Remove previous texsize declarations
-    while (std::regex_search(sourcePreprocessed, matches, std::regex("float4\\s+texsize_.*")))
+    for (size_t pos; (pos = FindTexSizeDeclaration(sourcePreprocessed, matchLength)) != std::string::npos;)
     {
-        sourcePreprocessed.replace(matches.position(), matches.length(), "");
+        sourcePreprocessed.erase(pos, matchLength);
     }
 
     // Collect unique samplers and texsize uniforms
