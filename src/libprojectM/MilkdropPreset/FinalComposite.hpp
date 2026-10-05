@@ -20,6 +20,11 @@ class FinalComposite : public Renderer::RenderItem
 public:
     FinalComposite();
 
+    /**
+     * @brief Deletes the element buffer, which RenderItem does not know about.
+     */
+    ~FinalComposite() override;
+
     void InitVertexAttrib() override;
 
     /**

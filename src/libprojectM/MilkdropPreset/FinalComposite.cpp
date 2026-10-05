@@ -18,6 +18,11 @@ FinalComposite::FinalComposite()
     RenderItem::Init();
 }
 
+FinalComposite::~FinalComposite()
+{
+    glDeleteBuffers(1, &m_elementBuffer);
+}
+
 void FinalComposite::InitVertexAttrib()
 {
     glGenBuffers(1, &m_elementBuffer);

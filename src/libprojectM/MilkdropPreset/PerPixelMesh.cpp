@@ -32,9 +32,8 @@ void PerPixelMesh::InitVertexAttrib()
 {
     m_drawVertices.resize(VerticesPerDrawCall); // Fixed size, may scale it later depending on GPU caps.
 
-    glGenVertexArrays(1, &m_vaoID);
-    glGenBuffers(1, &m_vboID);
-
+    // RenderItem::Init() has already generated m_vaoID and m_vboID; generating them again here
+    // would orphan the first pair, once per preset.
     glBindVertexArray(m_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
 
