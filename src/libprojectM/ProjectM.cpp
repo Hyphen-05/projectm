@@ -190,6 +190,21 @@ void ProjectM::RenderFrame()
         }
     }
 
+    // The beat sensitivity scales how far the instant beat values swing around 1, their resting level: 1 leaves them
+    // as MilkDrop computes them, 2 doubles every rise and dip. The smoothed (_att) values are left alone, and it is
+    // applied after the hard cut check so that keeps its own sensitivity.
+    float const unscaledVolume = audioData.vol;
+    if (m_beatSensitivity != 1.0f)
+    {
+        auto const swing = [this](float value) {
+            return std::max(0.0f, 1.0f + (value - 1.0f) * m_beatSensitivity);
+        };
+        audioData.bass = swing(audioData.bass);
+        audioData.mid = swing(audioData.mid);
+        audioData.treb = swing(audioData.treb);
+        audioData.vol = (audioData.bass + audioData.mid + audioData.treb) * 0.333f;
+    }
+
     // If no preset is active, load the idle preset.
     if (!m_activePreset)
     {
@@ -254,7 +269,7 @@ void ProjectM::RenderFrame()
     }
 
     m_frameCount++;
-    m_previousFrameVolume = audioData.vol;
+    m_previousFrameVolume = unscaledVolume;
 }
 
 void ProjectM::Initialize()

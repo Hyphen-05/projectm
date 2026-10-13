@@ -48,7 +48,9 @@ PROJECTM_EXPORT void projectm_set_texture_search_paths(projectm_handle instance,
 /**
  * @brief Sets the beat sensitivity.
  *
- * The beat sensitivity to be used.
+ * Scales how far the instant beat values a preset reads (bass, mid, treb and vol) swing around 1, their resting
+ * level. 1 leaves them as MilkDrop computes them, 2 doubles every rise and dip, 0 holds them at 1. The smoothed
+ * values (bass_att and so on) and the hard cut detection are not affected. Clamped to 0..2.
  *
  * @param instance The projectM instance handle.
  * @param sensitivity The sensitivity setting.
