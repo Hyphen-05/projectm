@@ -118,6 +118,34 @@ void TextureAttachment::ReplaceTexture(int width, int height)
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // A new texture's contents are undefined, and on some GPUs they are whatever was in that memory before.
+    // Presets feed the main texture back into itself, so leftover memory would show in the first frames after
+    // every resize. Clear colour attachments to transparent black, as Milkdrop's fresh textures are.
+    if (m_attachmentType == AttachmentType::Color)
+    {
+        GLint previousDrawFramebuffer = 0;
+        GLuint clearFramebuffer = 0;
+
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFramebuffer);
+        glGenFramebuffers(1, &clearFramebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, clearFramebuffer);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+        if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+        {
+            GLboolean previousColorMask[4];
+            const GLfloat transparentBlack[4]{};
+
+            glGetBooleanv(GL_COLOR_WRITEMASK, previousColorMask);
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glClearBufferfv(GL_COLOR, 0, transparentBlack);
+            glColorMask(previousColorMask[0], previousColorMask[1], previousColorMask[2], previousColorMask[3]);
+        }
+
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(previousDrawFramebuffer));
+        glDeleteFramebuffers(1, &clearFramebuffer);
+    }
+
     m_texture = std::make_shared<class Texture>("", textureId, GL_TEXTURE_2D, width, height, false);
 }
 
