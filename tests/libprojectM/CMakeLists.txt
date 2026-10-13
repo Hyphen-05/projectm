@@ -1,6 +1,11 @@
 find_package(GTest 1.10 REQUIRED NO_MODULE)
 
 add_executable(projectM-unittest
+        HLSLParserTest.cpp
+        HLSLModuloTest.cpp
+        MilkdropShaderCommentParsingTest.cpp
+        PCMTest.cpp
+        PresetFileParserTest.cpp
         WaveformAlignerTest.cpp
         PresetFileParserTest.cpp
         MilkdropShaderCommentParsingTest.cpp
@@ -23,6 +28,7 @@ target_include_directories(projectM-unittest
         PRIVATE
         "${PROJECTM_SOURCE_DIR}/src/libprojectM"
         "${PROJECTM_SOURCE_DIR}"
+        "${PROJECTM_SOURCE_DIR}/vendor/hlslparser/src"
         )
 
 target_link_libraries(projectM-unittest

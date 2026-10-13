@@ -1,5 +1,6 @@
 
 #include "Engine.h"
+#include <cctype>
 
 #include <stdio.h>  // vsnprintf
 #include <string.h> // strcmp, strcasecmp
@@ -67,31 +68,19 @@ bool String_EqualNoCase(const char * a, const char * b) {
 static inline double iss_strtod(const char * in, char ** end) {
     char * in_var = const_cast<char *>(in);
 
-    // The tokenizer calls this for every token that is not an operator, so the common
-    // case by far is an identifier that is not a number at all. A numeric literal can
-    // only start with a digit or a decimal point -- leading whitespace is already
-    // skipped and a leading sign is rejected by the caller -- so answering that case
-    // here keeps the stream and locale machinery off the hot path entirely.
-    if ((in[0] < '0' || in[0] > '9') && in[0] != '.') {
+    // The tokenizer calls this for every token, so only the characters that can form a number
+    // are passed to the stream.
+    const char * numEnd = in;
+    while (isdigit(*numEnd) || *numEnd == '.' || *numEnd == 'e' || *numEnd == 'E' ||
+           ((*numEnd == '+' || *numEnd == '-') && numEnd > in && (numEnd[-1] == 'e' || numEnd[-1] == 'E')))
+        ++numEnd;
+    if (numEnd == in) {
         *end = in_var;
         return 0.0;
     }
 
-    // Parse out of a bounded copy. Constructing a stream straight from `in` copies
-    // everything from here to the terminating NUL, which is the whole remainder of the
-    // shader source on every single call.
-    char buf[64];
-    size_t n = 0;
-    while (n + 1 < sizeof(buf) && in[n] != '\0') {
-        buf[n] = in[n];
-        ++n;
-    }
-    buf[n] = '\0';
-
     double df;
-    std::istringstream iss(buf);
-    // std::locale::classic() returns a reference to a static locale; std::locale("C")
-    // constructs a named locale, with all its facets, on every call.
+    std::istringstream iss(std::string(in, numEnd));
     iss.imbue(std::locale::classic());
     iss >> df;
     if(iss.fail()) {
@@ -99,7 +88,7 @@ static inline double iss_strtod(const char * in, char ** end) {
         return 0.0;
     }
     if(iss.eof()) {
-        *end = in_var + n;
+        *end = in_var + (numEnd - in);
         return df;
     }
 
