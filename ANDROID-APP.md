@@ -8,7 +8,7 @@ the app uses it.** The app's own code is not part of libprojectM and is not here
 
 - Upstream: https://github.com/projectM-visualizer/projectm
 - Base: tag `v4.1.8`, commit `4967dc003e5206d7df3ff447287f7609c47d2343`
-- On top of it, the patches the app applies before every native build, `0002` to `0007`, in that order. Until
+- On top of it, the patches the app applies before every native build, `0002` to `0008`, in that order. Until
   2026-10-13 the base was `v4.1.7` with patches `0001` to `0006`, one commit each; the move to `v4.1.8` is a merge
   of the upstream tag carrying `0002` to `0006`, with `0001` dropped because upstream now does the same thing, and
   `0007` follows as its own commit. Later fixes to a patch follow as commits of their own. The branch's latest tree is
