@@ -1,7 +1,7 @@
 # libprojectM, as built into Cometfly
 
 Cometfly, an Android music visualiser, links libprojectM, which is licensed under the GNU Lesser
-General Public License version 2.1 (`LICENSE.txt`). **This branch, `android`, is that library's source exactly as
+General Public License version 2.1 ([LICENSE.txt](LICENSE.txt)). **This branch, `android`, is that library's source exactly as
 the app uses it.** The app's own code is not part of libprojectM and is not here.
 
 ## What this branch is
