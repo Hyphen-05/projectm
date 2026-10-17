@@ -36,6 +36,11 @@ public:
         return m_message;
     }
 
+    const char* what() const noexcept override
+    {
+        return m_message.c_str();
+    }
+
 private:
     std::string m_message;
 };
