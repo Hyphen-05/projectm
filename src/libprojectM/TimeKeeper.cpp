@@ -34,7 +34,9 @@ void TimeKeeper::UpdateTimers()
         currentFrameTime = std::chrono::duration<double>(currentTime - m_startTime).count();
     }
 
-    m_secondsSinceLastFrame = currentFrameTime - m_currentTime;
+    // A user-specified time may step backwards. Audio smoothing raises its decay rates to the power of
+    // this value, so a negative one would amplify the averages instead of decaying them.
+    m_secondsSinceLastFrame = std::max(0.0, currentFrameTime - m_currentTime);
     m_currentTime = currentFrameTime;
     m_presetFrameA++;
     m_presetFrameB++;
