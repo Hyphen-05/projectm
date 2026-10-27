@@ -218,6 +218,18 @@ void projectm_opengl_render_frame(projectm_handle instance)
     projectMInstance->RenderFrame();
 }
 
+void projectm_set_frame_time(projectm_handle instance, double seconds_since_first_frame)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    projectMInstance->SetFrameTime(seconds_since_first_frame);
+}
+
+double projectm_get_last_frame_time(projectm_handle instance)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    return projectMInstance->GetFrameTime();
+}
+
 void projectm_set_beat_sensitivity(projectm_handle instance, float sensitivity)
 {
     auto projectMInstance = handle_to_instance(instance);
