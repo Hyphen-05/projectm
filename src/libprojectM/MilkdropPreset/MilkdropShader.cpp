@@ -808,14 +808,37 @@ void MilkdropShader::TranspileHLSLShader(const PresetState& presetState, std::st
 
     // Now we have GLSL source for the preset shader program (hopefully it's valid!)
     // Compile the preset shader fragment shader with the standard vertex shader and cross our fingers.
-    if (m_type == ShaderType::WarpShader)
+    const auto& vertexShader = m_type == ShaderType::WarpShader
+                                   ? MilkdropStaticShaders::Get()->GetPresetWarpVertexShader()
+                                   : MilkdropStaticShaders::Get()->GetPresetCompVertexShader();
+    try
     {
-        m_shader.CompileProgram(MilkdropStaticShaders::Get()->GetPresetWarpVertexShader(), glsl);
+        m_shader.CompileProgram(vertexShader, glsl);
     }
-    else
+    catch (const Renderer::ShaderException&)
     {
-        m_shader.CompileProgram(MilkdropStaticShaders::Get()->GetPresetCompVertexShader(), glsl);
+        // Some PowerVR drivers refuse a shader with hundreds of NaN-safe multiplies when each one is a branch, and
+        // say only "Compile failed.". Written as one select, the result is the same for every input, but other
+        // drivers compile that more slowly, so it is only tried once the driver has refused the branch.
+        if (!UseSelectForMult(glsl))
+        {
+            throw;
+        }
+        m_shader.CompileProgram(vertexShader, glsl);
     }
+}
+
+auto MilkdropShader::UseSelectForMult(std::string& glsl) -> bool
+{
+    static const std::string branch = "if (x == 0.0 || y == 0.0) { return 0.0; } else { return (x * y); }";
+    static const std::string select = "return (x == 0.0 || y == 0.0) ? 0.0 : (x * y);";
+    bool replaced = false;
+    for (auto at = glsl.find(branch); at != std::string::npos; at = glsl.find(branch, at + select.size()))
+    {
+        glsl.replace(at, branch.size(), select);
+        replaced = true;
+    }
+    return replaced;
 }
 
 auto MilkdropShader::TranslateToGlsl(ShaderType type,

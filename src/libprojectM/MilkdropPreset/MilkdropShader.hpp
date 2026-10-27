@@ -131,6 +131,12 @@ private:
                                 int glslGeneratorVersion) -> std::string;
 
     /**
+     * @brief Rewrites the NaN-safe multiply helpers hlslparser emits from an if/else into one select.
+     * @return false when the GLSL has none of them, so a retry would compile the same source again.
+     */
+    static auto UseSelectForMult(std::string& glsl) -> bool;
+
+    /**
      * @brief The cache key for a translation: every input of TranslateToGlsl.
      */
     static auto TranslationKey(ShaderType type,
