@@ -190,6 +190,14 @@ int WaveformAligner::CalculateOffset(std::vector<WaveformBuffer>& newWaveformMip
     return alignOffset;
 }
 
+void WaveformAligner::Reset()
+{
+    for (auto& mip : m_oldWaveformMips)
+    {
+        mip.fill(0.0f);
+    }
+}
+
 void WaveformAligner::Align(WaveformBuffer& newWaveform)
 {
     if (m_octaves < 4)

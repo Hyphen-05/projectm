@@ -72,6 +72,11 @@ public:
      */
     PROJECTM_EXPORT auto GetFrameAudioData() const -> FrameAudioData;
 
+    /**
+     * @brief Discards all buffered audio and the loudness history. See Loudness::Reset().
+     */
+    PROJECTM_EXPORT void Reset();
+
 private:
     template<
         int signalAmplitude,

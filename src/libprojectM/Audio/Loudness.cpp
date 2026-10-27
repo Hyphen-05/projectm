@@ -38,8 +38,25 @@ void Loudness::SumBand(const std::array<float, SpectrumSamples>& spectrumSamples
     }
 }
 
+void Loudness::Reset()
+{
+    m_current = 0.0f;
+    m_average = 0.0f;
+    m_longAverage = 0.0f;
+    m_currentRelative = 1.0f;
+    m_averageRelative = 1.0f;
+    m_seedAverages = true;
+}
+
 void Loudness::UpdateBandAverage(double secondsSinceLastFrame, uint32_t frame)
 {
+    if (m_seedAverages)
+    {
+        m_average = m_current;
+        m_longAverage = m_current;
+        m_seedAverages = false;
+    }
+
     float rate = AdjustRateToFps(m_current > m_average ? 0.2f : 0.5f, secondsSinceLastFrame);
     m_average = m_average * rate + m_current * (1.0f - rate);
 

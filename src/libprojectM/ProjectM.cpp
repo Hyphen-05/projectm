@@ -394,6 +394,12 @@ double ProjectM::GetFrameTime()
     return m_timeKeeper->GetFrameTime();
 }
 
+void ProjectM::ResetFrameState()
+{
+    m_audioStorage.Reset();
+    m_frameCount = 0;
+}
+
 void ProjectM::SetBeatSensitivity(float sensitivity)
 {
     m_beatSensitivity = std::min(std::max(0.0f, sensitivity), 2.0f);

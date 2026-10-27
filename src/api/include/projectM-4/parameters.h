@@ -78,6 +78,19 @@ PROJECTM_EXPORT void projectm_set_frame_time(projectm_handle instance, double se
 PROJECTM_EXPORT double projectm_get_last_frame_time(projectm_handle instance);
 
 /**
+ * @brief Discards the buffered audio, the loudness history and the frame count.
+ *
+ * The next frame is frame 0 again and hears only the audio added after this call. The loudness averages
+ * start from that frame's own loudness, so bass, mid and treb and their _att values begin at 1.0, as with
+ * audio already playing, rather than from the silence a new instance starts with.
+ * Together with projectm_set_frame_time, this lets one instance render several presets in turn and give
+ * each the same result whatever was rendered before it, e.g. for preview images.
+ *
+ * @param instance The projectM instance handle.
+ */
+PROJECTM_EXPORT void projectm_reset_frame_state(projectm_handle instance);
+
+/**
  * @brief Sets the beat sensitivity.
  *
  * Scales how far the instant beat values a preset reads (bass, mid, treb and vol) swing around 1, their resting

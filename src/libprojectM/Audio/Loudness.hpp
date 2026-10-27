@@ -47,6 +47,12 @@ public:
     void Update(const std::array<float, SpectrumSamples>& spectrumSamples, double secondsSinceLastFrame, uint32_t frame);
 
     /**
+     * @brief Forgets the averages. The next update starts both from its own loudness, so the relative
+     *        values begin at 1.0 as they would with audio already playing, not from silence.
+     */
+    void Reset();
+
+    /**
      * @brief Returns the current frame's unattenuated loudness relative to the previous frame.
      * This value will revolve around 1.0, with <0.7 being very silent and >1.3 very loud audio.
      * @return The current frame's unattenuated loudness relative to the previous frame.
@@ -88,6 +94,7 @@ private:
     float m_current{};     //!< The current frame's sum of all frequency strengths in the current band.
     float m_average{};     //!< The short-term averaged value of m_current.
     float m_longAverage{}; //!< The long-term averaged value of m_current.
+    bool m_seedAverages{false}; //!< Set by Reset(): the next update starts both averages from m_current.
 
     float m_currentRelative{1.0f}; //!< The relative loudness value to the previous frame.
     float m_averageRelative{1.0f}; //!< The attenuated relative loudness value.

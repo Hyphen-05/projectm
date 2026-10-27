@@ -138,6 +138,11 @@ public:
      */
     double GetFrameTime();
 
+    /**
+     * @brief Discards the audio history and restarts the frame count. See projectm_reset_frame_state().
+     */
+    void ResetFrameState();
+
     void SetBeatSensitivity(float sensitivity);
 
     auto GetBeatSensitivity() const -> float;

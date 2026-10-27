@@ -230,6 +230,12 @@ double projectm_get_last_frame_time(projectm_handle instance)
     return projectMInstance->GetFrameTime();
 }
 
+void projectm_reset_frame_state(projectm_handle instance)
+{
+    auto projectMInstance = handle_to_instance(instance);
+    projectMInstance->ResetFrameState();
+}
+
 void projectm_set_beat_sensitivity(projectm_handle instance, float sensitivity)
 {
     auto projectMInstance = handle_to_instance(instance);

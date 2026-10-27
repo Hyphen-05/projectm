@@ -67,6 +67,22 @@ void PCM::UpdateFrameAudioData(double secondsSinceLastFrame, uint32_t frame)
 
 }
 
+void PCM::Reset()
+{
+    m_inputBufferL.fill(0.0f);
+    m_inputBufferR.fill(0.0f);
+    m_start = 0;
+    m_waveformL.fill(0.0f);
+    m_waveformR.fill(0.0f);
+    m_spectrumL.fill(0.0f);
+    m_spectrumR.fill(0.0f);
+    m_alignL.Reset();
+    m_alignR.Reset();
+    m_bass.Reset();
+    m_middles.Reset();
+    m_treble.Reset();
+}
+
 auto PCM::GetFrameAudioData() const -> FrameAudioData
 {
     FrameAudioData data{};

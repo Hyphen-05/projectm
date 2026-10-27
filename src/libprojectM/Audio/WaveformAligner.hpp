@@ -34,6 +34,11 @@ public:
      */
     void Align(WaveformBuffer& newWaveform);
 
+    /**
+     * @brief Forgets the previous frame's waveform, so the next one is aligned as if it were the first.
+     */
+    void Reset();
+
 protected:
     void GenerateWeights();
     int CalculateOffset(std::vector<WaveformBuffer>& newWaveformMips);
