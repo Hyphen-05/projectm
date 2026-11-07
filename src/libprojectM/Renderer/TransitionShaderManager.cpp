@@ -31,8 +31,9 @@ auto TransitionShaderManager::RandomTransition() -> std::shared_ptr<Shader>
 auto TransitionShaderManager::CompileTransitionShader(const std::string& shaderBodyCode) -> std::shared_ptr<Shader>
 {
 #ifdef USE_GLES
-    // GLES also requires a precision specifier for variables and 3D samplers
-    constexpr char versionHeader[] = "#version 300 es\n\nprecision mediump float;\nprecision mediump sampler3D;\n";
+    // GLES also requires a precision specifier for variables and 3D samplers. highp, which every GLES 3.0 fragment
+    // shader has: the transitions do arithmetic on random 32-bit seeds (iRandStatic), which mediump cannot hold.
+    constexpr char versionHeader[] = "#version 300 es\n\nprecision highp float;\nprecision mediump sampler3D;\n";
 #else
     constexpr char versionHeader[] = "#version 330\n\n";
 #endif

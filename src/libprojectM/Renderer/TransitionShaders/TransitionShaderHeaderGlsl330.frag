@@ -4,8 +4,11 @@ uniform vec4 durationParams;
 uniform vec2 timeParams;
 uniform float iFrameRate;
 uniform int iFrame;
-uniform ivec4 iRandStatic;
-uniform ivec4 iRandFrame;
+// highp: these are random 32-bit values, and an int's default precision in a GLES fragment shader is mediump, which
+// a GPU may keep in 16 bits. On a PowerVR GPU under ANGLE that broke the circle, plasma and sweep transitions,
+// which then showed the old preset until the end and cut to the new one.
+uniform highp ivec4 iRandStatic;
+uniform highp ivec4 iRandFrame;
 uniform vec3 iBeatValues;
 uniform vec3 iBeatAttValues;
 
